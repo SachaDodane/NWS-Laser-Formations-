@@ -97,8 +97,10 @@ export default function ChapterPage({ params }: ChapterPageProps) {
       setNextChapter(data.nextChapter);
       setPrevChapter(data.prevChapter);
       
-      // Mark chapter as viewed
-      markChapterAsCompleted();
+      // Vérifier si le chapitre est déjà complété
+      if (data.isCompleted) {
+        setCompleted(true);
+      }
     } catch (error) {
       console.error('Error fetching chapter data:', error);
       toast.error('Erreur lors du chargement du chapitre');

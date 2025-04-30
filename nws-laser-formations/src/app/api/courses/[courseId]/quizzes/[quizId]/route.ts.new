@@ -1,0 +1,180 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { connectDB } from '@/lib/db/connect';
+import Course from '@/models/Course';
+import User from '@/models/User';
+import Progress from '@/models/Progress';
+
+// Interface pour un quiz
+interface QuizQuestion {
+  _id?: any;
+  question: string;
+  options?: string[];
+  correctAnswer?: number;
+  correctAnswers?: number[];
+  explanation?: string;
+}
+
+interface Quiz {
+  _id: any;
+  title: string;
+  description?: string;
+  isFinal?: boolean;
+  passingScore?: number;
+  questions?: QuizQuestion[];
+}
+
+interface CourseDocument {
+  _id: any;
+  title: string;
+  quizzes?: Quiz[];
+  chapters?: any[];
+}
+
+export async function GET(
+  request: NextRequest,
+  context: { params: { courseId: string; quizId: string } }
+) {
+  try {
+    const params = context.params;
+    const { courseId, quizId } = params;
+    
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json(
+        { message: 'Non autorisé' },
+        { status: 401 }
+      );
+    }
+    
+    await connectDB();
+    
+    // Vérification de l'accès de l'utilisateur au cours
+    const user = await User.findById(session.user.id);
+    if (!user || !user.courses.some((id: any) => id.toString() === courseId)) {
+      return NextResponse.json(
+        { message: 'Vous n\'avez pas accès à cette formation' },
+        { status: 403 }
+      );
+    }
+    
+    // Récupération du cours
+    const course = await Course.findById(courseId).lean() as CourseDocument;
+    if (!course) {
+      return NextResponse.json(
+        { message: 'Formation non trouvée' },
+        { status: 404 }
+      );
+    }
+    
+    // Vérification de l'existence des quiz
+    if (!Array.isArray(course.quizzes) || course.quizzes.length === 0) {
+      return NextResponse.json(
+        { message: 'Aucun quiz disponible pour ce cours' },
+        { status: 404 }
+      );
+    }
+    
+    // Recherche du quiz spécifique
+    const quiz = course.quizzes.find(q => q._id && q._id.toString() === quizId);
+    if (!quiz) {
+      return NextResponse.json(
+        { message: 'Quiz non trouvé' },
+        { status: 404 }
+      );
+    }
+    
+    // Récupération de la progression de l'utilisateur
+    const progress = await Progress.findOne({
+      userId: session.user.id,
+      courseId: courseId,
+    }).lean();
+    
+    if (!progress) {
+      return NextResponse.json(
+        { message: 'Progression non trouvée' },
+        { status: 404 }
+      );
+    }
+    
+    // Recherche des résultats du quiz s'ils existent
+    const quizResult = progress.quizResults && Array.isArray(progress.quizResults) 
+      ? progress.quizResults.find(result => result.quizId && result.quizId.toString() === quizId)
+      : null;
+    
+    // Récupération du certificat s'il existe
+    const certificate = progress.certificate 
+      ? {
+          issuedDate: progress.certificate.issuedDate ? new Date(progress.certificate.issuedDate).toISOString() : null,
+          certificateUrl: progress.certificate.certificateUrl || null,
+        }
+      : null;
+    
+    // Formatage du quiz en fonction de si l'utilisateur l'a déjà complété ou non
+    const formattedQuiz = {
+      _id: quiz._id.toString(),
+      title: quiz.title || 'Quiz sans titre',
+      description: quiz.description || '',
+      isFinal: quiz.isFinal || false,
+      passingScore: quiz.passingScore || 70,
+      questions: Array.isArray(quiz.questions) 
+        ? quiz.questions.map(q => {
+            // Structure de base de la question
+            const questionObj: any = {
+              _id: q._id ? q._id.toString() : undefined,
+              question: q.question,
+              options: Array.isArray(q.options) ? q.options : [],
+            };
+            
+            // Si l'utilisateur a déjà fait le quiz, on inclut les réponses correctes
+            if (quizResult) {
+              // Soit on a correctAnswer, soit correctAnswers, on priorise correctAnswer
+              if (q.correctAnswer !== undefined) {
+                questionObj.correctAnswer = q.correctAnswer;
+              } else if (Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0) {
+                questionObj.correctAnswer = q.correctAnswers[0]; // On prend la première réponse correcte
+              }
+              questionObj.explanation = q.explanation;
+            }
+            
+            return questionObj;
+          })
+        : []
+    };
+    
+    // Formatage simplifié du cours
+    const formattedCourse = {
+      _id: course._id.toString(),
+      title: course.title,
+      // On n'inclut que l'information minimum nécessaire
+    };
+    
+    // Formatage du résultat du quiz
+    const formattedQuizResult = quizResult 
+      ? {
+          quizId: quizResult.quizId.toString(),
+          score: quizResult.score || 0,
+          passed: quizResult.passed || false,
+          attemptedAt: quizResult.lastAttemptDate 
+            ? new Date(quizResult.lastAttemptDate).toISOString() 
+            : new Date().toISOString(),
+          attempts: quizResult.attempts || 1,
+        }
+      : null;
+    
+    return NextResponse.json({
+      quiz: formattedQuiz,
+      course: formattedCourse,
+      quizResult: formattedQuizResult,
+      certificate,
+    });
+  } catch (error: any) {
+    console.error('Error fetching quiz:', error);
+    return NextResponse.json(
+      { message: error.message || 'Une erreur est survenue lors du chargement du quiz' },
+      { status: 500 }
+    );
+  }
+}

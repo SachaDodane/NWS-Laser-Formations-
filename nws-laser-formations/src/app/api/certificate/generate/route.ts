@@ -53,6 +53,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // NOUVELLE VÉRIFICATION: S'assurer que tous les quiz ont été complétés
+    if (Array.isArray(course.quizzes) && course.quizzes.length > 0) {
+      // Vérifier si quizResults existe et est un tableau
+      if (!progress.quizResults || !Array.isArray(progress.quizResults)) {
+        return NextResponse.json(
+          { message: "Vous devez compléter tous les quiz pour obtenir votre certificat." },
+          { status: 400 }
+        );
+      }
+
+      // Préparer un ensemble des IDs de quiz du cours
+      const courseQuizIds = new Set(course.quizzes.map(quiz => quiz._id.toString()));
+      
+      // Obtenir les IDs des quiz réussis dans la progression
+      const passedQuizIds = new Set(
+        progress.quizResults
+          .filter(result => result.passed === true)
+          .map(result => result.quizId.toString())
+      );
+
+      // Vérifier si tous les quiz du cours ont été réussis
+      for (const quizId of courseQuizIds) {
+        if (!passedQuizIds.has(quizId)) {
+          return NextResponse.json(
+            { message: "Vous devez réussir tous les quiz pour obtenir votre certificat." },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     // Générer le certificat PDF
     const pdfBuffer = await generateCertificatePDF({
       courseTitle,

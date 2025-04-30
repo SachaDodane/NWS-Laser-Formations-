@@ -88,8 +88,6 @@ export default function QuizPage({ params }: QuizPageProps) {
     setCurrentQuestion(0);
     if (quiz && Array.isArray(quiz.questions)) {
       setSelectedAnswers(Array(quiz.questions.length).fill(-1));
-    } else {
-      setSelectedAnswers([]);
     }
     setQuizCompleted(false);
     setScore(0);
@@ -97,17 +95,13 @@ export default function QuizPage({ params }: QuizPageProps) {
   };
   
   const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
-    if (!quiz || !Array.isArray(quiz.questions)) return;
-    
     const newSelectedAnswers = [...selectedAnswers];
     newSelectedAnswers[questionIndex] = answerIndex;
     setSelectedAnswers(newSelectedAnswers);
   };
   
   const handleNextQuestion = () => {
-    if (!quiz || !Array.isArray(quiz.questions)) return;
-    
-    if (currentQuestion < quiz.questions.length - 1) {
+    if (quiz && Array.isArray(quiz.questions) && currentQuestion < quiz.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
@@ -354,65 +348,60 @@ export default function QuizPage({ params }: QuizPageProps) {
                       : null);
                 
                 return (
-                  <React.Fragment key={index}>
-                    <div 
-                      className={`mb-6 p-4 rounded-md ${
-                        correctAnswer !== null && selectedAnswers[index] === correctAnswer
-                          ? 'bg-green-50 border border-green-200'
-                          : 'bg-red-50 border border-red-200'
-                      }`}
-                    >
-                      <div className="flex items-start">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 bg-white text-sm font-medium">
-                          {index + 1}
-                        </span>
-                        <div className="flex-1">
-                          <h3 className="text-md font-semibold text-gray-900 mb-2">{question.question}</h3>
-                          <ul className="space-y-2 mb-3">
-                            {Array.isArray(question.options) && question.options.map((option: any, optIndex: number) => (
-                              <li key={optIndex} className="flex items-start">
-                                <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mr-2 mt-0.5 ${
-                                  correctAnswer !== null && optIndex === correctAnswer
-                                    ? 'bg-green-100 text-green-700'
-                                    : optIndex === selectedAnswers[index]
-                                    ? 'bg-red-100 text-red-700'
-                                    : 'bg-gray-100 text-gray-700'
-                                }`}>
-                                  {correctAnswer !== null && optIndex === correctAnswer ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  ) : optIndex === selectedAnswers[index] ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                  ) : null}
-                                </div>
-                                <span className={`${
-                                  correctAnswer !== null && optIndex === correctAnswer
-                                    ? 'text-green-700 font-medium'
-                                    : optIndex === selectedAnswers[index]
-                                    ? 'text-red-700'
-                                    : 'text-gray-700'
-                                }`}>
-                                  {typeof option === 'string' 
-                                    ? option 
-                                    : typeof option === 'object' && option !== null
-                                      ? (Array.isArray(option) ? option.join('') : Object.values(option).join(''))
-                                      : JSON.stringify(option)}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                          {question.explanation && (
-                            <div className="text-gray-600 text-sm bg-gray-50 p-3 rounded">
-                              <strong>Explication:</strong> {question.explanation}
-                            </div>
-                          )}
-                        </div>
+                  <div 
+                    key={index} 
+                    className={`mb-6 p-4 rounded-md ${
+                      correctAnswer !== null && selectedAnswers[index] === correctAnswer
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-red-50 border border-red-200'
+                    }`}
+                  >
+                    <div className="flex items-start">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 bg-white text-sm font-medium">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1">
+                        <h3 className="text-md font-semibold text-gray-900 mb-2">{question.question}</h3>
+                        <ul className="space-y-2 mb-3">
+                          {Array.isArray(question.options) && question.options.map((option: string, optIndex: number) => (
+                            <li key={optIndex} className="flex items-start">
+                              <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mr-2 mt-0.5 ${
+                                correctAnswer !== null && optIndex === correctAnswer
+                                  ? 'bg-green-100 text-green-700'
+                                  : optIndex === selectedAnswers[index]
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-gray-100 text-gray-700'
+                              }`}>
+                                {correctAnswer !== null && optIndex === correctAnswer ? (
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                ) : optIndex === selectedAnswers[index] ? (
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                ) : null}
+                              </div>
+                              <span className={`${
+                                correctAnswer !== null && optIndex === correctAnswer
+                                  ? 'text-green-700 font-medium'
+                                  : optIndex === selectedAnswers[index]
+                                  ? 'text-red-700'
+                                  : 'text-gray-700'
+                              }`}>
+                                {typeof option === 'string' ? option : JSON.stringify(option)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                        {question.explanation && (
+                          <div className="text-gray-600 text-sm bg-gray-50 p-3 rounded">
+                            <strong>Explication:</strong> {question.explanation}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </React.Fragment>
+                  </div>
                 );
               })}
               
@@ -458,7 +447,7 @@ export default function QuizPage({ params }: QuizPageProps) {
           </div>
           
           <div className="p-6">
-            {Array.isArray(quiz.questions) && quiz.questions.length > currentQuestion && (
+            {Array.isArray(quiz.questions) && quiz.questions.length > currentQuestion ? (
               <div className="mb-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   {quiz.questions[currentQuestion].question}
@@ -489,11 +478,7 @@ export default function QuizPage({ params }: QuizPageProps) {
                             )}
                           </div>
                           <span className={selectedAnswers[currentQuestion] === index ? 'text-blue-700' : 'text-gray-700'}>
-                            {typeof option === 'string' 
-                              ? option 
-                              : typeof option === 'object' && option !== null
-                                ? (Array.isArray(option) ? option.join('') : Object.values(option).join(''))
-                                : JSON.stringify(option)}
+                            {typeof option === 'string' ? option : JSON.stringify(option)}
                           </span>
                         </div>
                       </div>
@@ -505,6 +490,10 @@ export default function QuizPage({ params }: QuizPageProps) {
                     )
                   }
                 </div>
+              </div>
+            ) : (
+              <div className="p-4 border rounded-lg bg-red-50">
+                <p className="text-red-600">Erreur: question non trouvée</p>
               </div>
             )}
             

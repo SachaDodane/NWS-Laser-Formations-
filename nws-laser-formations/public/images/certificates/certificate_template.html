@@ -5,27 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Certificat de réussite</title>
   <style>
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
     body {
       font-family: 'Helvetica', 'Arial', sans-serif;
       margin: 0;
       padding: 0;
       background-color: #f0f9ff;
       color: #1f2937;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
     .certificate {
       width: 297mm;
       height: 210mm;
       margin: 0 auto;
       background-color: white;
-      border: 20px solid #3b82f6;
+      border: 15px solid #3b82f6;
       position: relative;
       box-sizing: border-box;
+      overflow: hidden;
+      page-break-after: always;
     }
     .certificate-inner {
       border: 2px solid #3b82f6;
-      margin: 15px;
-      height: calc(100% - 30px);
-      padding: 50px;
+      margin: 10px;
+      height: calc(100% - 20px);
+      padding: 30px;
       background-color: #f0f9ff;
       display: flex;
       flex-direction: column;
@@ -34,19 +42,19 @@
     }
     .header {
       text-align: center;
-      margin-bottom: 30px;
-    }
-    .title {
-      font-size: 40px;
-      color: #1e3a8a;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-    .logo {
       margin-bottom: 20px;
     }
+    .title {
+      font-size: 38px;
+      color: #1e3a8a;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .logo {
+      margin-bottom: 15px;
+    }
     .logo img {
-      height: 80px;
+      height: 70px;
     }
     .content {
       text-align: center;
@@ -57,35 +65,35 @@
       width: 100%;
     }
     .intro {
-      font-size: 24px;
-      margin-bottom: 20px;
+      font-size: 22px;
+      margin-bottom: 15px;
     }
     .student-name {
-      font-size: 36px;
+      font-size: 34px;
       color: #2563eb;
       font-weight: bold;
-      margin-bottom: 30px;
-    }
-    .course-statement {
-      font-size: 24px;
       margin-bottom: 20px;
     }
+    .course-statement {
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
     .course-title {
-      font-size: 32px;
+      font-size: 30px;
       color: #1e3a8a;
       font-weight: bold;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     .date {
-      font-size: 20px;
-      margin-bottom: 40px;
+      font-size: 18px;
+      margin-bottom: 20px;
     }
     .footer {
       text-align: center;
-      margin-top: 30px;
+      margin-top: 20px;
     }
     .signature {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
     .signature-line {
       width: 200px;
@@ -94,18 +102,18 @@
       margin: 10px auto;
     }
     .company {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
     }
     .legal {
-      font-size: 14px;
+      font-size: 12px;
       color: #64748b;
-      margin-top: 20px;
+      margin-top: 15px;
     }
     .decoration {
       position: absolute;
-      width: 100px;
-      height: 100px;
+      width: 80px;
+      height: 80px;
       background-color: #3b82f6;
       opacity: 0.1;
       border-radius: 50%;
@@ -126,6 +134,38 @@
       bottom: 20px;
       right: 20px;
     }
+    .qr-code {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      opacity: 0.8;
+    }
+    .badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 400px;
+      background-image: url('/images/courses/badge_overlay.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.05;
+      pointer-events: none;
+    }
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      .certificate {
+        margin: 0;
+        border: 15px solid #3b82f6;
+      }
+    }
   </style>
 </head>
 <body>
@@ -134,6 +174,7 @@
     <div class="decoration top-right"></div>
     <div class="decoration bottom-left"></div>
     <div class="decoration bottom-right"></div>
+    <div class="badge"></div>
     
     <div class="certificate-inner">
       <div class="header">
