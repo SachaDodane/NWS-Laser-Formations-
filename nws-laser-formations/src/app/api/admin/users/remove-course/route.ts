@@ -16,9 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const formData = await request.formData();
-    const userId = formData.get('userId') as string;
-    const courseId = formData.get('courseId') as string;
+    const { userId, courseId } = await request.json();
     
     if (!userId || !courseId) {
       return NextResponse.json(
@@ -58,8 +56,7 @@ export async function POST(request: NextRequest) {
       courseId: courseId,
     });
     
-    // Redirect back to user detail page
-    return NextResponse.redirect(new URL(`/admin/users/${userId}`, request.url));
+    return NextResponse.json({ success: true, message: 'Formation retirée avec succès' });
   } catch (error: any) {
     console.error('Error removing course from user:', error);
     return NextResponse.json(
