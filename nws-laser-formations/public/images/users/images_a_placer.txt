@@ -1,0 +1,7 @@
+Images à placer dans ce dossier:
+
+user-default.jpg - Image de profil par défaut (silhouette neutre)
+user-admin.jpg - Image pour le compte administrateur
+user-1.jpg à user-10.jpg - Photos de profil variées pour les comptes exemple
+
+Note: Utilisez des photos de profil carrées (ratio 1:1, 300x300px recommandé).

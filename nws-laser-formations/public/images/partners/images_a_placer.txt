@@ -1,0 +1,9 @@
+Images à placer dans ce dossier:
+
+partner1.png - Image du partenaire 1
+partner2.png - Image du partenaire 2
+partner3.png - Image du partenaire 3
+partner4.png - Image du partenaire 4
+partner5.png - Image du partenaire 5
+
+Note: Utilisez des logos d'entreprises partenaires au format PNG avec fond transparent (200x80px recommandé).

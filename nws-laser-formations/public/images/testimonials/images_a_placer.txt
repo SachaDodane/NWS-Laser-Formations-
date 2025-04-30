@@ -1,0 +1,9 @@
+Images à placer dans ce dossier:
+
+avatar1.jpg - Photo de profil de Sophie Martin, designer laser
+avatar2.jpg - Photo de profil de Thomas Dubois, technicien dans l'industrie
+avatar3.jpg - Photo de profil de Camille Leroy, enseignante en technologie
+avatar4.jpg - Photo de profil de Marc Lambert, entrepreneur
+avatar5.jpg - Photo de profil de Julie Bernard, artisane créatrice
+
+Note: Utilisez des photos de type portrait professionnel (ratio 1:1, 400x400px recommandé).

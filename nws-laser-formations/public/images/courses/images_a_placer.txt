@@ -1,0 +1,10 @@
+Images à placer dans ce dossier:
+
+default.jpg - Image par défaut utilisée quand aucune image spécifique n'est disponible
+course-1.jpg - Image pour la formation "Introduction aux technologies laser"
+course-2.jpg - Image pour la formation "Sécurité et normes en milieu laser"
+course-3.jpg - Image pour la formation "Techniques avancées de découpe laser"
+course-4.jpg - Image pour la formation "Gravure laser sur différents matériaux"
+course-5.jpg - Image pour la formation "Certification opérateur laser professionnel"
+
+Note: Utilisez des images de haute qualité (min. 1200x800px) montrant des équipements laser professionnels et leurs applications.

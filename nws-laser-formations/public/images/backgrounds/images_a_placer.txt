@@ -1,0 +1,17 @@
+Images à placer dans ce dossier:
+
+bg-hero.jpg - Arrière-plan pour la section hero (en-tête) de la page d'accueil
+bg-pattern-blue.svg - Motif bleu répétitif pour les sections colorées
+bg-features.jpg - Arrière-plan léger pour la section caractéristiques
+bg-cta.jpg - Arrière-plan pour section d'appel à l'action
+bg-testimonials.jpg - Arrière-plan section témoignages
+bg-courses.jpg - Arrière-plan pour la liste des cours
+bg-login.jpg - Arrière-plan subtil pour les pages d'authentification
+bg-footer.svg - Motif pour le pied de page
+
+decoration-laser-beam.svg - Élément décoratif de faisceau laser (utilisé en divers endroits)
+decoration-dots.svg - Motif de points pour éléments décoratifs
+decoration-wave.svg - Forme d'onde décorative pour séparer les sections
+decoration-corner.svg - Élément décoratif pour les coins de cartes/sections
+
+Note: Pour les arrière-plans, privilégiez des images haute résolution (min. 1920x1080px). Pour les éléments décoratifs, utilisez de préférence des fichiers SVG pour une mise à l'échelle optimale.

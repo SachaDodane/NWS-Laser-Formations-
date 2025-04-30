@@ -1,0 +1,18 @@
+Images à placer dans ce dossier:
+
+chapter-1-1.jpg - Image pour le chapitre 1 du cours 1 (Introduction)
+chapter-1-2.jpg - Image pour le chapitre 2 du cours 1 (Types de lasers)
+chapter-1-3.jpg - Image pour le chapitre 3 du cours 1 (Applications)
+chapter-1-4.jpg - Image pour le chapitre 4 du cours 1 (Technologies actuelles)
+
+chapter-2-1.jpg - Image pour le chapitre 1 du cours 2 (Risques laser)
+chapter-2-2.jpg - Image pour le chapitre 2 du cours 2 (Protections individuelles)
+chapter-2-3.jpg - Image pour le chapitre 3 du cours 2 (Normes européennes)
+
+chapter-3-1.jpg - Image pour le chapitre 1 du cours 3 (Principes de découpe)
+chapter-3-2.jpg - Image pour le chapitre 2 du cours 3 (Matériaux compatibles)
+chapter-3-3.jpg - Image pour le chapitre 3 du cours 3 (Paramètres avancés)
+chapter-3-4.jpg - Image pour le chapitre 4 du cours 3 (Techniques spécifiques)
+chapter-3-5.jpg - Image pour le chapitre 5 du cours 3 (Dépannages courants)
+
+Note: Utilisez des images illustrant clairement le contenu de chaque chapitre (1200x600px recommandé).
