@@ -48,9 +48,9 @@ export default async function Home() {
 
   // Tableau d'images pour les cours (fallback si pas d'image dans la DB)
   const courseImages = [
-    "https://hucam.fr/wp-content/uploads/2022/04/traitement-laser-textile-scaled.jpg",
-    "https://www.ma-piece-sur-mesure.com/wp-content/uploads/2022/02/quel-laser-pour-quelle-epaisseur-de-metal.jpg",
-    "https://decoupelaserplus.com/wp-content/uploads/2019/02/home_laser_1.png"
+    "/images/courses/default.jpg",
+    "/images/courses/default.jpg",
+    "/images/courses/default.jpg"
   ];
   
   return (
@@ -183,9 +183,9 @@ export default async function Home() {
                       className="object-cover" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
-                      <div className="p-4 text-white">
+                      <Link href={`/courses/${course._id}`} className="p-4 text-white w-full">
                         <p className="font-bold">Voir les détails</p>
-                      </div>
+                      </Link>
                     </div>
                   </div>
                   <div className="p-6">
