@@ -16,6 +16,11 @@ const PromoCodeSchema = new mongoose.Schema({
     max: 100,
     default: 10,
   },
+  courseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course',
+    default: null,
+  },
   isFreePass: {
     type: Boolean,
     default: false,

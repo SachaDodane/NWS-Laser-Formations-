@@ -10,15 +10,22 @@ interface PromoCode {
   maxUses: number;
   currentUses: number;
   isActive: boolean;
-  expiresAt: string;
+  courseId: string | null;
+  expiresAt: string | null;
   createdAt: string;
+}
+
+interface Course {
+  _id: string;
+  title: string;
 }
 
 interface PromoCodesListProps {
   initialCodes: PromoCode[];
+  courses: Course[];
 }
 
-export default function PromoCodesList({ initialCodes }: PromoCodesListProps) {
+export default function PromoCodesList({ initialCodes, courses }: PromoCodesListProps) {
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>(initialCodes);
   const [isCreating, setIsCreating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +39,7 @@ export default function PromoCodesList({ initialCodes }: PromoCodesListProps) {
     isFreePass: false,
     maxUses: 10,
     isActive: true,
+    courseId: null,
     expiresAt: ''
   });
   
@@ -134,6 +142,7 @@ export default function PromoCodesList({ initialCodes }: PromoCodesListProps) {
         isFreePass: false,
         maxUses: 10,
         isActive: true,
+        courseId: null,
         expiresAt: ''
       });
       setIsCreating(false);
@@ -326,6 +335,24 @@ export default function PromoCodesList({ initialCodes }: PromoCodesListProps) {
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
+              
+              <div>
+                <label htmlFor="courseId" className="block text-sm font-medium text-gray-700">
+                  Cours associé
+                </label>
+                <select
+                  id="courseId"
+                  name="courseId"
+                  value={newCode.courseId || ""}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="">Aucun</option>
+                  {courses.map(course => (
+                    <option key={course._id} value={course._id}>{course.title}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             
             <div className="flex items-center">
@@ -404,6 +431,9 @@ export default function PromoCodesList({ initialCodes }: PromoCodesListProps) {
                 Expiration
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Cours associé
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Statut
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -434,6 +464,15 @@ export default function PromoCodesList({ initialCodes }: PromoCodesListProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{code.expiresAt}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {code.courseId ? (
+                      courses.find(course => course._id === code.courseId)?.title
+                    ) : (
+                      'Aucun'
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -467,7 +506,7 @@ export default function PromoCodesList({ initialCodes }: PromoCodesListProps) {
             
             {promoCodes.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
                   Aucun code promo trouvé. Créez-en un !
                 </td>
               </tr>

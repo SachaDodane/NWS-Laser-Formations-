@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import CourseFormFields from '@/components/admin/CourseFormFields';
 import ChapterManager from '@/components/admin/ChapterManager';
 import QuizManager from '@/components/admin/QuizManager';
+import DownloadCourseImage from '@/components/admin/DownloadCourseImage';
 
 interface CoursePageProps {
   params: {
@@ -27,6 +28,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     description: '',
     price: '',
     imageUrl: '',
+    image: '',
     chapters: [],
     quizzes: []
   });
@@ -225,7 +227,7 @@ export default function CoursePage({ params }: CoursePageProps) {
               </p>
             </div>
             <div className="px-6 py-6">
-              <CourseFormFields
+              <CourseFormFields 
                 values={{
                   title: course.title,
                   description: course.description,
@@ -235,6 +237,20 @@ export default function CoursePage({ params }: CoursePageProps) {
                 errors={errors}
                 onChange={handleChange}
               />
+              
+              {/* Ajout du composant pour télécharger l'image du cours */}
+              {!isNewCourse && (
+                <DownloadCourseImage 
+                  courseId={params.courseId}
+                  currentImageUrl={course.image}
+                  onImageDownloaded={(newImagePath) => {
+                    setCourse({
+                      ...course,
+                      image: newImagePath
+                    });
+                  }}
+                />
+              )}
             </div>
           </div>
           

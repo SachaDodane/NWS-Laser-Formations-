@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 interface Chapter {
   _id?: string;
@@ -270,12 +269,13 @@ export default function CourseForm({ initialData, courseId }: CourseFormProps = 
   };
   
   const handleDeleteQuestionOption = (quizIndex: number, questionIndex: number, optionIndex: number) => {
+    const updatedQuizzes = [...course.quizzes];
+    
     if (updatedQuizzes[quizIndex].questions[questionIndex].options.length <= 2) {
       alert('Une question doit avoir au moins 2 options.');
       return;
     }
     
-    const updatedQuizzes = [...course.quizzes];
     const options = updatedQuizzes[quizIndex].questions[questionIndex].options.filter(
       (_, i) => i !== optionIndex
     );
@@ -497,13 +497,12 @@ export default function CourseForm({ initialData, courseId }: CourseFormProps = 
                 <div className="mt-2">
                   <p className="text-sm text-gray-500 mb-2">Aperçu :</p>
                   <div className="relative h-32 w-full max-w-xs overflow-hidden rounded-lg border border-gray-300">
-                    <Image
+                    {/* Remplacer Image par img pour éviter les restrictions de domaine */}
+                    <img
                       src={course.imageUrl}
                       alt="Course preview"
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover"
-                      onError={() => {
+                      className="object-cover w-full h-full"
+                      onError={(e) => {
                         setCourse({
                           ...course,
                           imageUrl: ''

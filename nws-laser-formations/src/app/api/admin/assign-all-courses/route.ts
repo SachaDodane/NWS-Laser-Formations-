@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { connectDB } from '@/lib/db/connect';
 import User from '@/models/User';
 import Course from '@/models/Course';
+import Progress from '@/models/Progress';
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,29 +29,67 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Récupérer toutes les formations
-    const allCourses = await Course.find().select('_id');
-    const courseIds = allCourses.map(course => course._id);
+    // Récupérer toutes les formations avec chapitres pour créer les progressions
+    const allCourses = await Course.find();
+    
+    // Convertir les IDs de cours déjà associés à l'administrateur en chaînes de caractères pour faciliter la comparaison
+    const existingCourseIds = adminUser.courses.map((id: any) => id.toString());
+    
+    // Filtrer les nouveaux cours
+    const newCourses = allCourses.filter(course => !existingCourseIds.includes(course._id.toString()));
 
-    // Mettre à jour l'utilisateur admin pour lui donner accès à toutes les formations
-    // Filtrer les cours déjà présents pour éviter les doublons
-    const existingCourseIds = adminUser.courses.map(id => id.toString());
-    const newCourseIds = courseIds.filter(id => !existingCourseIds.includes(id.toString()));
-
-    if (newCourseIds.length === 0) {
+    if (newCourses.length === 0) {
       return NextResponse.json(
         { message: 'L\'administrateur a déjà accès à toutes les formations.' },
         { status: 200 }
       );
     }
 
-    // Ajouter les nouveaux cours
+    // Tableau pour stocker les promesses de création des progressions
+    const progressPromises = [];
+    const newCourseIds = [];
+
+    // Pour chaque nouvelle formation
+    for (const course of newCourses) {
+      // Ajouter l'ID du cours à la liste des IDs
+      newCourseIds.push(course._id);
+      
+      // Calculer le nombre total de chapitres pour le pourcentage de progression
+      const totalChapters = course.chapters.length;
+      
+      // Créer un objet de progression avec tous les chapitres marqués comme complétés
+      const chapterProgress = course.chapters.map((chapter: any) => ({
+        chapterId: chapter._id,
+        isCompleted: true,
+        completedAt: new Date()
+      }));
+      
+      // Créer une entrée de progression
+      const progressPromise = Progress.create({
+        userId: adminUser._id,
+        courseId: course._id,
+        completionPercentage: totalChapters > 0 ? 100 : 0, // 100% si au moins un chapitre, sinon 0%
+        isCompleted: totalChapters > 0, // Complété si au moins un chapitre
+        chapterProgress: chapterProgress,
+        quizResults: [], // Pas de résultats de quiz pour l'administrateur
+        startedAt: new Date(),
+        lastAccessedAt: new Date(),
+        completedAt: totalChapters > 0 ? new Date() : null, // Date de complétion si la formation est considérée complétée
+      });
+      
+      progressPromises.push(progressPromise);
+    }
+
+    // Ajouter les nouveaux cours à l'administrateur
     adminUser.courses.push(...newCourseIds);
     await adminUser.save();
+    
+    // Attendre que toutes les progressions soient créées
+    await Promise.all(progressPromises);
 
     return NextResponse.json(
       { 
-        message: `${newCourseIds.length} formations ont été ajoutées à votre compte administrateur.`,
+        message: `${newCourseIds.length} formations ont été ajoutées à votre compte administrateur avec un accès complet.`,
         coursesAdded: newCourseIds.length
       },
       { status: 200 }

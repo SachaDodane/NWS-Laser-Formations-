@@ -108,13 +108,23 @@ export async function POST(
     
     // Calculer le pourcentage de progression
     const totalChapters = course.chapters.length;
-    const completedChapters = progress.chapterProgress.filter((cp: any) => cp && cp.completed).length;
-    const completionPercentage = Math.round((completedChapters / totalChapters) * 100);
+    
+    // Compter uniquement les chapitres uniques complétés
+    // Création d'un Set pour éviter les doublons
+    const uniqueCompletedChapterIds = new Set();
+    progress.chapterProgress.forEach((cp: any) => {
+      if (cp && cp.completed && cp.chapterId) {
+        uniqueCompletedChapterIds.add(cp.chapterId.toString());
+      }
+    });
+    
+    const completedChapters = uniqueCompletedChapterIds.size;
+    const completionPercentage = Math.min(100, Math.round((completedChapters / totalChapters) * 100));
     
     progress.completionPercentage = completionPercentage;
     
     // Vérifier si tous les chapitres sont terminés et tous les quiz sont réussis
-    const allChaptersCompleted = completedChapters === totalChapters;
+    const allChaptersCompleted = uniqueCompletedChapterIds.size === totalChapters;
     
     // S'assurer que les quizzes existent
     if (Array.isArray(course.quizzes)) {

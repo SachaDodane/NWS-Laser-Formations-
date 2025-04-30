@@ -13,6 +13,7 @@ interface Course {
   description: string;
   price: number;
   image?: string;
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -47,7 +48,37 @@ export default function CourseCard({ course, progress, showProgress = false }: C
   const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   
+  // Déterminer si l'utilisateur est déjà inscrit à ce cours
   const isEnrolled = progress !== undefined;
+  
+  // Vérifier si l'utilisateur est un administrateur
+  const isAdmin = session?.user?.role === 'admin';
+
+  // Si admin et pas encore inscrit, rediriger vers l'API d'attribution de tous les cours
+  const handleAdminAccess = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/assign-all-courses', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'attribution des cours');
+      }
+
+      toast.success('Tous les cours ont été attribués à votre compte');
+      router.refresh();
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error('Une erreur est survenue lors de l\'attribution des cours');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const completionPercentage = progress?.completionPercentage || 0;
   
   // Obtenir une image de secours basée sur l'ID du cours (stable pour le même cours)
@@ -59,12 +90,7 @@ export default function CourseCard({ course, progress, showProgress = false }: C
   };
   
   // Déterminer l'image à utiliser
-  let imageToUse = course.image;
-  
-  // Si l'image n'existe pas ou a généré une erreur, utiliser une image de secours locale
-  if (!imageToUse || imageError) {
-    imageToUse = getFallbackImage();
-  }
+  let imageToUse = course.image && course.image.trim() !== '' ? course.image : (course.imageUrl && course.imageUrl.trim() !== '' ? course.imageUrl : getFallbackImage());
   
   const handlePurchase = async () => {
     if (!session) {
@@ -98,24 +124,28 @@ export default function CourseCard({ course, progress, showProgress = false }: C
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <p className="text-white font-bold text-lg">{course.title}</p>
-          {isEnrolled && (
-            <div className="bg-white/20 rounded-full h-1.5 mt-2">
-              <div 
-                className="bg-green-400 h-1.5 rounded-full" 
-                style={{ width: `${completionPercentage}%` }}
-              ></div>
-            </div>
-          )}
-        </div>
+        
+        {/* Overlay "Voir les détails" au survol */}
+        <Link href={`/courses/${course._id}`} className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
+          <div className="p-4 text-white w-full">
+            <p className="font-bold">Voir les détails</p>
+          </div>
+        </Link>
       </div>
       <div className="p-4">
         <p className="text-gray-600 line-clamp-2 h-10 mb-3">{course.description}</p>
         <div className="flex justify-between items-center mt-2">
           <span className="font-bold text-blue-600">{course.price}€</span>
           
-          {isEnrolled ? (
+          {isAdmin && !isEnrolled ? (
+            <button
+              onClick={handleAdminAccess}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-70"
+            >
+              {loading ? 'Chargement...' : 'Attribuer automatiquement'}
+            </button>
+          ) : isEnrolled ? (
             <Link 
               href={`/my-courses/${course._id}`} 
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"

@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
         currentUses: code.currentUses || 0,
         isActive: code.isActive,
         expiresAt: code.expiresAt,
+        courseId: code.courseId || null,
         createdAt: code.createdAt,
         updatedAt: code.updatedAt,
       }))
@@ -94,6 +95,7 @@ export async function POST(request: NextRequest) {
       isFreePass: promoCodeData.isFreePass || false,
       maxUses: promoCodeData.maxUses,
       isActive: promoCodeData.isActive !== undefined ? promoCodeData.isActive : true,
+      courseId: promoCodeData.courseId || null,
       expiresAt: promoCodeData.expiresAt || null,
     });
     

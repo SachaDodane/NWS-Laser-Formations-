@@ -18,21 +18,11 @@ export default function QuizPage({ params }: QuizPageProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
   
-  // Utiliser React.use pour déballer les params (Next.js 14+)
-  // Mais gérer également la rétrocompatibilité
-  let courseId: string;
-  let quizId: string;
-
-  try {
-    // Essayer d'utiliser React.use si disponible
-    const unwrappedParams = React.use(params as any) as { courseId: string; quizId: string };
-    courseId = unwrappedParams.courseId;
-    quizId = unwrappedParams.quizId;
-  } catch (error) {
-    // Fallback pour la rétrocompatibilité
-    courseId = (params as any).courseId;
-    quizId = (params as any).quizId;
-  }
+  // Déballer les paramètres en utilisant explicitement React.use()
+  // Cela résout l'avertissement de Next.js
+  const unwrappedParams = React.use(params as any) as { courseId: string; quizId: string };
+  const courseId = unwrappedParams.courseId;
+  const quizId = unwrappedParams.quizId;
   
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<any>(null);

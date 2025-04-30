@@ -97,30 +97,45 @@ interface CertificateData {
 }
 
 async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
-  // Utiliser un certificat statique
-  const certificatePath = path.join(process.cwd(), 'public', 'images', 'certificates', 'certificate_template.html');
-  let templateHtml = fs.readFileSync(certificatePath, 'utf8');
-  
-  // Remplacer les variables
-  templateHtml = templateHtml
-    .replace('{{USER_NAME}}', data.userName)
-    .replace('{{COURSE_TITLE}}', data.courseTitle)
-    .replace('{{COMPLETION_DATE}}', data.completionDate);
-  
-  // Créer un fichier HTML temporaire
-  const tempHtmlPath = path.join(process.cwd(), 'public', 'certificates', 'temp_certificate.html');
-  fs.writeFileSync(tempHtmlPath, templateHtml);
-  
   try {
+    // Utiliser un certificat statique
+    const certificatePath = path.join(process.cwd(), 'public', 'images', 'certificates', 'certificate_template.html');
+    
+    if (!fs.existsSync(certificatePath)) {
+      throw new Error("Le modèle de certificat est introuvable");
+    }
+    
+    let templateHtml = fs.readFileSync(certificatePath, 'utf8');
+    
+    // Remplacer les variables
+    templateHtml = templateHtml
+      .replace('{{USER_NAME}}', data.userName)
+      .replace('{{COURSE_TITLE}}', data.courseTitle)
+      .replace('{{COMPLETION_DATE}}', data.completionDate);
+    
+    // Créer le dossier certificates s'il n'existe pas
+    const certificatesDir = path.join(process.cwd(), 'public', 'certificates');
+    if (!fs.existsSync(certificatesDir)) {
+      fs.mkdirSync(certificatesDir, { recursive: true });
+    }
+    
+    // Créer un fichier HTML temporaire
+    const tempHtmlPath = path.join(certificatesDir, 'temp_certificate.html');
+    fs.writeFileSync(tempHtmlPath, templateHtml);
+    
     // Lancer Puppeteer pour convertir HTML en PDF
     const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true,  // Revenir à la valeur booléenne pour compatibilité
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
+    
     const page = await browser.newPage();
     
-    // Charger le HTML
-    await page.goto(`file://${tempHtmlPath}`, { waitUntil: 'networkidle0' });
+    // Charger le HTML avec un timeout suffisant
+    await page.goto(`file://${tempHtmlPath}`, { 
+      waitUntil: 'networkidle0',
+      timeout: 30000 
+    });
     
     // Générer le PDF
     const pdf = await page.pdf({
@@ -137,12 +152,17 @@ async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
     
     await browser.close();
     
-    // Supprimer le fichier temporaire
-    fs.unlinkSync(tempHtmlPath);
+    // Supprimer le fichier temporaire après utilisation
+    try {
+      fs.unlinkSync(tempHtmlPath);
+    } catch (error) {
+      console.warn('Erreur lors de la suppression du fichier temporaire:', error);
+      // Continuer malgré l'erreur de nettoyage
+    }
     
     return pdf;
   } catch (error) {
-    console.error('Erreur lors de la génération du PDF:', error);
-    throw new Error('Erreur lors de la génération du certificat');
+    console.error('Erreur détaillée lors de la génération du PDF:', error);
+    throw new Error('Erreur lors de la génération du certificat: ' + (error as Error).message);
   }
 }

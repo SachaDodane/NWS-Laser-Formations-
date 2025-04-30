@@ -36,6 +36,7 @@ export async function GET(
       description: course.description,
       price: course.price,
       imageUrl: course.imageUrl || '',
+      image: course.image || '',
       chapters: course.chapters.map((chapter: any) => ({
         _id: chapter._id.toString(),
         title: chapter.title,
@@ -111,6 +112,11 @@ export async function PUT(
     course.description = courseData.description;
     course.price = courseData.price;
     course.imageUrl = courseData.imageUrl || '';
+    
+    // Add support for local image path
+    if (courseData.image) {
+      course.image = courseData.image;
+    }
     
     // Handle chapters
     if (courseData.chapters) {

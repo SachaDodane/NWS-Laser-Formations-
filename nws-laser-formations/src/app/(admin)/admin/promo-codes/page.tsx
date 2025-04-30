@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import Link from 'next/link';
 import { connectDB } from '@/lib/db/connect';
 import PromoCode from '@/models/PromoCode';
+import Course from '@/models/Course';
 import PromoCodesList from '@/components/admin/PromoCodesList';
 
 export const metadata = {
@@ -14,18 +15,30 @@ export const metadata = {
 async function getPromoCodes() {
   await connectDB();
   
-  const promoCodes = await PromoCode.find().sort({ createdAt: -1 }).lean();
+  const codes = await PromoCode.find().sort({ createdAt: -1 }).lean();
   
-  return promoCodes.map((code: any) => ({
+  return codes.map((code: any) => ({
     _id: code._id.toString(),
     code: code.code,
     discount: code.discount,
-    isFreePass: code.isFreePass || false,
+    isFreePass: code.isFreePass,
     maxUses: code.maxUses,
-    currentUses: code.currentUses || 0,
+    currentUses: code.currentUses,
     isActive: code.isActive,
-    expiresAt: code.expiresAt ? new Date(code.expiresAt).toLocaleDateString() : 'Pas de date d\'expiration',
-    createdAt: code.createdAt ? new Date(code.createdAt).toLocaleDateString() : 'N/A',
+    courseId: code.courseId ? code.courseId.toString() : null,
+    expiresAt: code.expiresAt ? new Date(code.expiresAt).toISOString() : null,
+    createdAt: new Date(code.createdAt).toLocaleDateString(),
+  }));
+}
+
+async function getCourses() {
+  await connectDB();
+  
+  const courses = await Course.find().sort({ title: 1 }).lean();
+  
+  return courses.map((course: any) => ({
+    _id: course._id.toString(),
+    title: course.title,
   }));
 }
 
@@ -37,6 +50,7 @@ export default async function PromoCodesPage() {
   }
   
   const promoCodes = await getPromoCodes();
+  const courses = await getCourses();
   
   return (
     <div className="bg-gray-50 min-h-screen py-12">
@@ -63,7 +77,7 @@ export default async function PromoCodesPage() {
         
         <div className="bg-white shadow-sm rounded-lg overflow-hidden">
           {/* Client component for managing promo codes */}
-          <PromoCodesList initialCodes={promoCodes} />
+          <PromoCodesList initialCodes={promoCodes} courses={courses} />
         </div>
       </div>
     </div>
