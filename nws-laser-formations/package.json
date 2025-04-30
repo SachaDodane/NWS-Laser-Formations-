@@ -21,6 +21,7 @@
     "next-auth": "^4.24.11",
     "pdfkit": "^0.17.0",
     "postcss": "^8.4.31",
+    "puppeteer": "^24.7.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.55.0",

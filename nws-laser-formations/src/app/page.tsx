@@ -95,7 +95,7 @@ export default async function Home() {
             <div className="flex justify-center slideInUp">
               <div className="relative w-72 h-72 md:w-96 md:h-96">
                 <Image
-                  src="/images/laser_education_icon.svg"
+                  src="/images/courses/laser_education_icon.png"
                   alt="NWS Laser Formations"
                   fill
                   className="object-contain"

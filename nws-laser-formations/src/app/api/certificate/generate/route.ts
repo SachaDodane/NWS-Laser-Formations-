@@ -5,7 +5,9 @@ import { connectDB } from '@/lib/db/connect';
 import Course from '@/models/Course';
 import Progress from '@/models/Progress';
 import User from '@/models/User';
-import PDFDocument from 'pdfkit';
+import fs from 'fs';
+import path from 'path';
+import * as puppeteer from 'puppeteer';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { courseId, courseTitle, userName } = await request.json();
+    const { courseId, courseTitle, userName, completionDate } = await request.json();
 
     if (!courseId || !courseTitle || !userName) {
       return NextResponse.json(
@@ -55,15 +57,28 @@ export async function POST(request: NextRequest) {
     const pdfBuffer = await generateCertificatePDF({
       courseTitle,
       userName,
-      completionDate: progress.completedAt ? new Date(progress.completedAt).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR'),
+      completionDate: completionDate || (progress.completedAt ? new Date(progress.completedAt).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')),
     });
+
+    // Enregistrer le certificat dans le dossier public pour le téléchargement
+    const sanitizedTitle = courseTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const fileName = `certificat_${sanitizedTitle}_${new Date().toISOString().split('T')[0]}.pdf`;
+    const certificatesDir = path.join(process.cwd(), 'public', 'certificates');
+    
+    // S'assurer que le répertoire existe
+    if (!fs.existsSync(certificatesDir)) {
+      fs.mkdirSync(certificatesDir, { recursive: true });
+    }
+    
+    const filePath = path.join(certificatesDir, fileName);
+    fs.writeFileSync(filePath, pdfBuffer);
 
     // Renvoyer le PDF
     return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="certificat_${courseTitle.replace(/\s+/g, '_').toLowerCase()}.pdf"`
+        'Content-Disposition': `attachment; filename="${fileName}"`
       }
     });
   } catch (error: any) {
@@ -82,100 +97,52 @@ interface CertificateData {
 }
 
 async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    try {
-      // Créer un nouveau document PDF
-      const doc = new PDFDocument({
-        layout: 'landscape',
-        size: 'A4',
-        margin: 50,
-        info: {
-          Title: `Certificat de réussite - ${data.courseTitle}`,
-          Author: 'NWS Laser Formations'
-        }
-      });
-
-      // Collecter les chunks dans un tampon
-      const chunks: Buffer[] = [];
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
-
-      // Ajouter une bordure décorative
-      doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40)
-        .lineWidth(3)
-        .stroke('#3b82f6');
-
-      // Ajouter une bordure intérieure
-      doc.rect(35, 35, doc.page.width - 70, doc.page.height - 70)
-        .lineWidth(1)
-        .stroke('#3b82f6');
-
-      // Ajouter un fond léger
-      doc.rect(35, 35, doc.page.width - 70, doc.page.height - 70)
-        .fill('#f0f9ff');
-
-      // Logo et en-tête
-      doc.fontSize(28)
-        .font('Helvetica-Bold')
-        .fillColor('#1e3a8a')
-        .text('CERTIFICAT DE RÉUSSITE', 0, 90, { align: 'center' });
-
-      // Ligne décorative
-      doc.moveTo(150, 125)
-        .lineTo(doc.page.width - 150, 125)
-        .lineWidth(2)
-        .stroke('#3b82f6');
-
-      // Le corps du certificat
-      doc.fontSize(16)
-        .font('Helvetica')
-        .fillColor('#1f2937')
-        .text('Ce certificat atteste que', 0, 160, { align: 'center' });
-
-      // Nom de la personne
-      doc.fontSize(28)
-        .font('Helvetica-Bold')
-        .fillColor('#2563eb')
-        .text(data.userName, 0, 200, { align: 'center' });
-
-      doc.fontSize(16)
-        .font('Helvetica')
-        .fillColor('#1f2937')
-        .text('a complété avec succès la formation', 0, 250, { align: 'center' });
-
-      // Titre du cours
-      doc.fontSize(24)
-        .font('Helvetica-Bold')
-        .fillColor('#1e3a8a')
-        .text(data.courseTitle, 0, 290, { align: 'center' });
-
-      // Date
-      doc.fontSize(14)
-        .font('Helvetica')
-        .fillColor('#1f2937')
-        .text(`Délivré le ${data.completionDate}`, 0, 340, { align: 'center' });
-
-      // Signature
-      doc.fontSize(14)
-        .fillColor('#1f2937')
-        .text('NWS Laser Formations', 0, 420, { align: 'center' });
-
-      // Ligne pour signature
-      doc.moveTo(250, 410)
-        .lineTo(doc.page.width - 250, 410)
-        .lineWidth(1)
-        .stroke('#3b82f6');
-
-      // Note de bas de page
-      doc.fontSize(10)
-        .fillColor('#64748b')
-        .text('Ce certificat confirme l\'achèvement réussi de tous les modules de la formation.', 0, 490, { align: 'center' });
-
-      // Finir le document
-      doc.end();
-    } catch (error) {
-      reject(error);
-    }
-  });
+  // Utiliser un certificat statique
+  const certificatePath = path.join(process.cwd(), 'public', 'images', 'certificates', 'certificate_template.html');
+  let templateHtml = fs.readFileSync(certificatePath, 'utf8');
+  
+  // Remplacer les variables
+  templateHtml = templateHtml
+    .replace('{{USER_NAME}}', data.userName)
+    .replace('{{COURSE_TITLE}}', data.courseTitle)
+    .replace('{{COMPLETION_DATE}}', data.completionDate);
+  
+  // Créer un fichier HTML temporaire
+  const tempHtmlPath = path.join(process.cwd(), 'public', 'certificates', 'temp_certificate.html');
+  fs.writeFileSync(tempHtmlPath, templateHtml);
+  
+  try {
+    // Lancer Puppeteer pour convertir HTML en PDF
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+    const page = await browser.newPage();
+    
+    // Charger le HTML
+    await page.goto(`file://${tempHtmlPath}`, { waitUntil: 'networkidle0' });
+    
+    // Générer le PDF
+    const pdf = await page.pdf({
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      margin: {
+        top: '20px',
+        right: '20px',
+        bottom: '20px',
+        left: '20px',
+      },
+    });
+    
+    await browser.close();
+    
+    // Supprimer le fichier temporaire
+    fs.unlinkSync(tempHtmlPath);
+    
+    return pdf;
+  } catch (error) {
+    console.error('Erreur lors de la génération du PDF:', error);
+    throw new Error('Erreur lors de la génération du certificat');
+  }
 }

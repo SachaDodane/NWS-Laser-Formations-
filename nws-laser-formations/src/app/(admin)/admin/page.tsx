@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { connectDB } from '@/lib/db/connect';
 import Course from '@/models/Course';
 import User from '@/models/User';
+import AdminActions from '@/components/admin/AdminActions';
 
 export const metadata = {
   title: 'Administration | NWS Laser Formations',
@@ -106,6 +107,9 @@ export default async function AdminPage() {
             </div>
           </div>
         </div>
+        
+        {/* Actions administrateur */}
+        <AdminActions />
         
         {/* Courses list */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
