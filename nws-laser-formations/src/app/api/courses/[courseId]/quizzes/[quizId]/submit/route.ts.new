@@ -33,7 +33,7 @@ export async function POST(
     
     // Check if user has access to this course
     const user = await User.findById(session.user.id);
-    if (!user || !user.courses.some((id: string) => id.toString() === params.courseId)) {
+    if (!user || !user.courses.some((id) => id.toString() === params.courseId)) {
       return NextResponse.json(
         { message: 'Vous n\'avez pas accès à cette formation' },
         { status: 403 }
@@ -73,7 +73,7 @@ export async function POST(
     
     // Update quiz result
     const quizResultIndex = progress.quizResults.findIndex(
-      (result: { quizId: string; score: number; passed: boolean; attempts: number; lastAttemptDate: Date }) => result.quizId && result.quizId.toString() === params.quizId
+      (result) => result.quizId && result.quizId.toString() === params.quizId
     );
     
     if (quizResultIndex === -1) {
@@ -93,14 +93,14 @@ export async function POST(
       progress.quizResults[quizResultIndex].lastAttemptDate = new Date();
     }
     
-    // Calculer le pourcentage de progression incluant les quiz
+    // NOUVEAU CODE: Calculer le pourcentage de progression incluant les quiz
     // Calculer le pourcentage de progression
     const totalChapters = Array.isArray(course.chapters) ? course.chapters.length : 0;
     
     // Compter uniquement les chapitres uniques complétés
     const uniqueCompletedChapterIds = new Set();
     if (Array.isArray(progress.chapterProgress)) {
-      progress.chapterProgress.forEach((cp: { completed: boolean; chapterId: string }) => {
+      progress.chapterProgress.forEach((cp) => {
         if (cp && cp.completed && cp.chapterId) {
           uniqueCompletedChapterIds.add(cp.chapterId.toString());
         }
@@ -116,14 +116,14 @@ export async function POST(
     if (totalQuizzes > 0 && Array.isArray(progress.quizResults)) {
       // Créer un ensemble des ID de quiz du cours
       const quizIds = new Set();
-      course.quizzes.forEach((q: { _id: string }) => {
+      course.quizzes.forEach((q) => {
         if (q && q._id) {
           quizIds.add(q._id.toString());
         }
       });
       
       // Compter les quiz réussis
-      progress.quizResults.forEach((result: { quizId: string; passed: boolean }) => {
+      progress.quizResults.forEach((result) => {
         if (result && result.quizId && result.passed && quizIds.has(result.quizId.toString())) {
           completedQuizzes++;
         }
@@ -170,7 +170,7 @@ export async function POST(
         certificateUrl: progress.certificate.certificateUrl,
       };
     }
-
+    
     await progress.save();
     
     return NextResponse.json({

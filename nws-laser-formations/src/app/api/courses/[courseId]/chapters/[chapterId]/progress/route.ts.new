@@ -1,0 +1,187 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { connectDB } from '@/lib/db/connect';
+import Progress from '@/models/Progress';
+import Course from '@/models/Course';
+import User from '@/models/User';
+
+export async function POST(
+  request: NextRequest,
+  context: { params: { courseId: string; chapterId: string } }
+) {
+  try {
+    // Récupérer les paramètres de manière sûre (Next.js 14+)
+    const params = context.params;
+    const { courseId, chapterId } = params;
+    
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
+    }
+    
+    await connectDB();
+    
+    const userId = session.user.id;
+    
+    // Vérifier si l'utilisateur existe et a accès à ce cours
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      return NextResponse.json(
+        { message: 'Utilisateur non trouvé' },
+        { status: 404 }
+      );
+    }
+    
+    // Vérification sécurisée que courses est un tableau et contient le cours
+    if (!Array.isArray(user.courses) || !user.courses.some((id: any) => id && id.toString() === courseId)) {
+      // L'utilisateur n'a pas encore accès au cours, on va créer l'accès
+      // C'est peut-être une situation d'inscription en cours ou un cours gratuit
+      console.log('Accès au cours non trouvé, création automatique...');
+      
+      // Mise à jour de l'utilisateur pour lui donner accès au cours
+      await User.findByIdAndUpdate(userId, {
+        $addToSet: { courses: courseId }
+      });
+    }
+    
+    // Créer ou récupérer la progression
+    let progress = await Progress.findOne({ userId, courseId });
+    
+    // Si aucune progression n'existe, en créer une
+    if (!progress) {
+      progress = new Progress({
+        userId,
+        courseId,
+        startDate: new Date(),
+        lastAccessDate: new Date(),
+        chapterProgress: [],
+        quizResults: [],
+        completionPercentage: 0,
+        isCompleted: false
+      });
+    }
+    
+    // Vérifier que chapterProgress est un tableau (sécurité)
+    if (!Array.isArray(progress.chapterProgress)) {
+      progress.chapterProgress = [];
+    }
+    
+    // Mettre à jour la progression du chapitre
+    const chapterProgressIndex = progress.chapterProgress.findIndex(
+      (cp: any) => cp && cp.chapterId && cp.chapterId.toString() === chapterId
+    );
+    
+    if (chapterProgressIndex === -1) {
+      // Si ce chapitre n'est pas encore dans la progression, l'ajouter
+      progress.chapterProgress.push({
+        chapterId,
+        completed: true,
+        lastAccessDate: new Date(),
+      });
+    } else {
+      // Sinon, le mettre à jour
+      progress.chapterProgress[chapterProgressIndex].completed = true;
+      progress.chapterProgress[chapterProgressIndex].lastAccessDate = new Date();
+    }
+    
+    // Mettre à jour la date du dernier accès
+    progress.lastAccessDate = new Date();
+    
+    // Récupérer le cours pour calculer le pourcentage de progression
+    const course = await Course.findById(courseId).lean();
+    if (!course) {
+      return NextResponse.json(
+        { message: 'Formation non trouvée' },
+        { status: 404 }
+      );
+    }
+    
+    // S'assurer que les chapitres existent
+    if (!Array.isArray(course.chapters) || course.chapters.length === 0) {
+      return NextResponse.json(
+        { message: 'Aucun chapitre trouvé pour cette formation' },
+        { status: 404 }
+      );
+    }
+    
+    // NOUVELLE IMPLÉMENTATION: Calculer le pourcentage de progression incluant les quiz
+    // Calculer le pourcentage de progression
+    const totalChapters = Array.isArray(course.chapters) ? course.chapters.length : 0;
+    
+    // Compter uniquement les chapitres uniques complétés
+    // Création d'un Set pour éviter les doublons
+    const uniqueCompletedChapterIds = new Set();
+    if (Array.isArray(progress.chapterProgress)) {
+      progress.chapterProgress.forEach((cp: any) => {
+        if (cp && cp.completed && cp.chapterId) {
+          uniqueCompletedChapterIds.add(cp.chapterId.toString());
+        }
+      });
+    }
+    
+    const completedChapters = uniqueCompletedChapterIds.size;
+    
+    // NOUVELLE PARTIE: Intégrer les quiz dans le calcul de progression
+    let totalQuizzes = 0;
+    let completedQuizzes = 0;
+    
+    if (Array.isArray(course.quizzes) && course.quizzes.length > 0) {
+      totalQuizzes = course.quizzes.length;
+      
+      // Vérifier que quizResults est un tableau (sécurité)
+      if (Array.isArray(progress.quizResults)) {
+        // Pour chaque quiz, vérifier s'il a été réussi
+        course.quizzes.forEach((quiz: any) => {
+          if (quiz && quiz._id) {
+            const quizId = quiz._id.toString();
+            const quizResult = progress.quizResults.find(
+              (qr: any) => qr && qr.quizId && qr.quizId.toString() === quizId && qr.passed
+            );
+            
+            if (quizResult) {
+              completedQuizzes++;
+            }
+          }
+        });
+      }
+    }
+    
+    // Calcul du pourcentage avec chapitres et quiz ayant le même coefficient
+    const totalItems = totalChapters + totalQuizzes;
+    const completedItems = completedChapters + completedQuizzes;
+    
+    // Éviter les divisions par zéro
+    const completionPercentage = totalItems > 0 
+      ? Math.min(100, Math.round((completedItems / totalItems) * 100))
+      : 0;
+    
+    progress.completionPercentage = completionPercentage;
+    
+    // Vérifier si tous les chapitres sont terminés et tous les quiz sont réussis
+    const allChaptersCompleted = completedChapters === totalChapters && totalChapters > 0;
+    const allQuizzesCompleted = completedQuizzes === totalQuizzes || totalQuizzes === 0;
+    
+    // Règle pour marquer le cours comme complété:
+    // - Si tous les chapitres sont terminés ET
+    // - Si tous les quiz disponibles ont été réussis
+    if (allChaptersCompleted && allQuizzesCompleted) {
+      progress.isCompleted = true;
+    }
+    
+    await progress.save();
+    
+    return NextResponse.json({
+      message: 'Chapitre terminé avec succès',
+      completionPercentage,
+      isCompleted: progress.isCompleted,
+    });
+  } catch (error: any) {
+    console.error('Error updating progress:', error);
+    return NextResponse.json(
+      { message: error.message || 'Une erreur est survenue lors du marquage du chapitre' },
+      { status: 500 }
+    );
+  }
+}
