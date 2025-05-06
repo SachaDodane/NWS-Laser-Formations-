@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { FadeIn } from '@/components/animations/MotionEffects';
 import ContactForm from '@/components/ContactForm';
+import GoogleMap from '@/components/maps/GoogleMap';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -8,6 +9,17 @@ export const metadata: Metadata = {
   title: 'Contact | NWS Laser Formations',
   description: 'Contactez-nous pour toutes vos questions sur nos formations laser professionnelles.',
 };
+
+// Coordonnées de Villers-les-Pots
+const LOCATION = {
+  address: '905a route départementale de Villers-les-Pots, 21130',
+  latitude: 47.7219,
+  longitude: 5.3159
+};
+
+// Remplacez cette valeur par votre clé d'API Google Maps réelle
+// Pour la sécurité, envisagez de déplacer cela dans un fichier .env
+const GOOGLE_MAPS_API_KEY = 'VOTRE_CLE_API_GOOGLE_MAPS';
 
 export default function ContactPage() {
   return (
@@ -65,7 +77,7 @@ export default function ContactPage() {
                     </div>
                     <div className="ml-3 text-gray-700">
                       <h3 className="text-lg font-medium text-gray-900">Adresse</h3>
-                      <p>167 Rue Claude Chappe, 76130 Mont-Saint-Aignan</p>
+                      <p>{LOCATION.address}</p>
                     </div>
                   </div>
                   
@@ -145,17 +157,16 @@ export default function ContactPage() {
           <div className="mt-12">
             <div className="bg-white p-4 rounded-lg shadow-lg">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Nous trouver</h2>
-              <div className="relative w-full h-96 rounded-lg overflow-hidden">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2594.644192111371!2d1.0678533767466306!3d49.4675030684996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e0dda100f1f82d%3A0x402a1376489b13f8!2s167%20Rue%20Claude%20Chappe%2C%2076130%20Mont-Saint-Aignan!5e0!3m2!1sfr!2sfr!4v1714460807958!5m2!1sfr!2sfr" 
-                  width="100%" 
-                  height="100%" 
-                  style={{ border: 0 }} 
-                  allowFullScreen 
-                  loading="lazy" 
-                  referrerPolicy="no-referrer-when-downgrade">
-                </iframe>
-              </div>
+              
+              {/* Utiliser le composant client GoogleMap */}
+              <GoogleMap 
+                apiKey={GOOGLE_MAPS_API_KEY}
+                address={LOCATION.address}
+                latitude={LOCATION.latitude}
+                longitude={LOCATION.longitude}
+                zoom={15}
+                height="500px"
+              />
             </div>
           </div>
         </FadeIn>
@@ -199,7 +210,7 @@ export default function ContactPage() {
                   <p className="mt-2 text-gray-600">
                     Pour obtenir votre certificat, vous devez compléter 100% de la formation, y compris tous 
                     les chapitres et réussir les quiz requis. Une fois ces conditions remplies, vous pourrez 
-                    télécharger votre certificat directement depuis la page de la formation dans votre espace personnel.
+                    télécharger votre certificat directement depuis votre espace personnel.
                   </p>
                 </div>
                 

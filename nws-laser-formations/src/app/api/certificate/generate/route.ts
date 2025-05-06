@@ -144,6 +144,11 @@ async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
       .replace('{{COURSE_TITLE}}', data.courseTitle)
       .replace('{{COMPLETION_DATE}}', data.completionDate);
     
+    // Remplacer le chemin du logo par un chemin absolu
+    const logoPath = path.join(process.cwd(), 'public', 'nws_laser_logo.png');
+    const logoDataUrl = `file://${logoPath.replace(/\\/g, '/')}`;
+    templateHtml = templateHtml.replace('/nws_laser_logo.png', logoDataUrl);
+    
     // Créer le dossier certificates s'il n'existe pas
     const certificatesDir = path.join(process.cwd(), 'public', 'certificates');
     if (!fs.existsSync(certificatesDir)) {

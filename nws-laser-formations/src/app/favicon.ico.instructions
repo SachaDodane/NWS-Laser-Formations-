@@ -1,0 +1,19 @@
+Étapes pour remplacer le favicon:
+
+1. Convertir le logo existant en favicon.ico:
+   - Prenez le fichier "/public/nws_laser_logo.png"
+   - Utilisez un convertisseur en ligne comme https://favicon.io/ ou https://realfavicongenerator.net/
+   - Générez un favicon.ico
+   - Remplacez le fichier existant à "src/app/favicon.ico"
+
+2. Si vous souhaitez une solution plus complète, générez un ensemble d'icônes pour différentes plateformes:
+   - favicon.ico (16x16, 32x32, 48x48)
+   - favicon-16x16.png
+   - favicon-32x32.png 
+   - apple-touch-icon.png (180x180)
+   - android-chrome-192x192.png
+   - android-chrome-512x512.png
+
+3. Placez tous ces fichiers dans le dossier "/public"
+
+Cette approche garantira que votre logo s'affiche correctement comme favicon sur tous les navigateurs et appareils.

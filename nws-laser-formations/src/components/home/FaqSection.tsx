@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface FaqItem {
   id: number;
@@ -10,6 +10,8 @@ interface FaqItem {
 
 export default function FaqSection() {
   const [openItem, setOpenItem] = useState<number | null>(null);
+  const [animated, setAnimated] = useState<number[]>([]);
+  const faqRef = useRef<HTMLDivElement>(null);
 
   const faqItems: FaqItem[] = [
     {
@@ -48,6 +50,47 @@ export default function FaqSection() {
     setOpenItem(openItem === id ? null : id);
   };
 
+  // Fonction pour animer l'entrée des questions au défilement
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Animer progressivement les éléments
+            const animateItems = () => {
+              let delay = 0;
+              for (let i = 1; i <= faqItems.length; i++) {
+                setTimeout(() => {
+                  setAnimated(prev => [...prev, i]);
+                }, delay);
+                delay += 150; // Délai entre chaque animation
+              }
+            };
+            animateItems();
+            
+            // Arrêter d'observer une fois animé
+            if (faqRef.current) {
+              observer.unobserve(faqRef.current);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.1 // Déclencher quand 10% de l'élément est visible
+      }
+    );
+
+    if (faqRef.current) {
+      observer.observe(faqRef.current);
+    }
+
+    return () => {
+      if (faqRef.current) {
+        observer.unobserve(faqRef.current);
+      }
+    };
+  }, [faqItems.length]);
+
   return (
     <section className="py-16 md:py-24 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,11 +103,16 @@ export default function FaqSection() {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6" ref={faqRef}>
           {faqItems.map((item) => (
             <div 
               key={item.id} 
-              className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 card-hover"
+              className={`bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-500 transform ${
+                animated.includes(item.id) 
+                  ? 'translate-x-0 opacity-100'
+                  : 'translate-x-20 opacity-0'
+              } ${openItem === item.id ? '' : 'hover:shadow-md'}`}
+              style={{ transitionDelay: `${item.id * 100}ms` }}
             >
               <button
                 className="w-full text-left p-6 focus:outline-none flex justify-between items-center"
@@ -75,7 +123,7 @@ export default function FaqSection() {
                   {item.question}
                 </h3>
                 <svg
-                  className={`h-6 w-6 text-blue-600 transform transition-transform duration-300 ${
+                  className={`h-6 w-6 text-blue-600 transform transition-transform duration-500 ${
                     openItem === item.id ? 'rotate-180' : ''
                   }`}
                   fill="none"
@@ -91,11 +139,11 @@ export default function FaqSection() {
                 </svg>
               </button>
               <div
-                className={`transition-all duration-300 overflow-hidden ${
+                className={`transition-all duration-700 ease-in-out overflow-hidden ${
                   openItem === item.id ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                 }`}
               >
-                <div className="p-6 pt-0 text-gray-600 border-t border-gray-100">
+                <div className="p-8 pt-2 text-gray-600 border-t border-gray-100">
                   {item.answer}
                 </div>
               </div>

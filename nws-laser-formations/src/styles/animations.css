@@ -159,6 +159,189 @@
   animation: colorChange 3s infinite;
 }
 
+/* Animation de lumière brillante (effet de reflet) */
+@keyframes shine {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-25deg);
+  animation: shine 4s infinite;
+}
+
+/* Animation de zoom avant/arrière */
+@keyframes scaleEffect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.scale-animate {
+  animation: scaleEffect 6s ease-in-out infinite;
+}
+
+/* Animation de parallaxe au scroll */
+.parallax-scroll {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.parallax-slow {
+  transform: translateY(var(--parallax-speed, 0));
+}
+
+/* Animation d'apparition au scroll */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animation de contour lumineux */
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+  }
+}
+
+.glow-effect {
+  animation: glowPulse 3s infinite;
+}
+
+/* Animation de machine à écrire */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink {
+  50% { border-color: transparent }
+}
+
+.typing-effect {
+  overflow: hidden;
+  white-space: normal;
+  border-right: 3px solid #2563eb;
+  width: 0;
+  animation: 
+    typing 3.5s steps(40, end) forwards,
+    blink .75s step-end infinite;
+}
+
+.typing-multi-line {
+  display: block;
+  overflow: hidden;
+  width: 0;
+  border-right: 3px solid #2563eb;
+  animation: 
+    typing 4s steps(60, end) forwards,
+    blink .75s step-end infinite;
+}
+
+/* Animation défilement infini */
+@keyframes scrollX {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.infinite-scroll {
+  animation: scrollX 20s linear infinite;
+}
+
+/* Animation de flottement */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.floating {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Animation onde */
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.wave-animate {
+  animation: wave 5s ease-in-out infinite;
+  transform-origin: center;
+}
+
 /* Animation pour les cartes */
 .card-hover {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -270,4 +453,33 @@
 .hover-underline:hover::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+
+/* Styles pour le composant TypewriterText */
+.typewriter-container {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+  font-family: inherit;
+}
+
+.typewriter-line {
+  display: block;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1.2em;
+  background-color: #2563eb;
+  margin-left: 2px;
+  animation: blink-cursor 0.75s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink-cursor {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
 }

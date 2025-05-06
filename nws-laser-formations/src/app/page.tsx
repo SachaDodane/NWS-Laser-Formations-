@@ -6,6 +6,8 @@ import TestimonialsSection from "@/components/home/TestimonialsSection";
 import StatsSection from "@/components/home/StatsSection";
 import FaqSection from "@/components/home/FaqSection";
 import PartnersSection from "@/components/home/PartnersSection";
+import ScrollAnimations from "@/components/ScrollAnimations";
+import TypewriterText from "@/components/TypewriterText";
 
 // Interface pour typer correctement les données de cours
 interface CourseData {
@@ -28,7 +30,7 @@ async function getTopCourses(): Promise<CourseData[]> {
     // Convertir les IDs et dates en chaînes pour éviter les erreurs d'hydratation
     return courses.map(course => ({
       ...course,
-      _id: course._id.toString(),
+      _id: course._id ? course._id.toString() : '',
       title: course.title || "Formation sans titre",
       description: course.description || "Aucune description disponible",
       price: course.price || 0,
@@ -55,12 +57,15 @@ export default async function Home() {
   
   return (
     <div className="bg-white">
+      {/* Composant pour activer les animations au scroll */}
+      <ScrollAnimations />
+      
       {/* Hero Section animée */}
       <section className="relative bg-blue-700 text-white overflow-hidden">
         {/* Background pattern avec animation */}
         <div className="absolute inset-0 opacity-10 overflow-hidden">
           <div className="absolute inset-y-0 right-0 w-1/2 bg-white"></div>
-          <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-blue-800"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-blue-800 parallax-scroll parallax-slow"></div>
           <div className="absolute top-0 left-0 w-full h-full">
             <svg className="absolute w-full h-full text-white opacity-5" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
               <path d="M-30,150 C-10,50 70,-30 150,50" stroke="currentColor" strokeWidth="12" fill="none" strokeDasharray="1 28" strokeLinecap="round" className="spin" style={{transformOrigin: "center"}}/>
@@ -74,13 +79,20 @@ export default async function Home() {
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
                 Formations laser <span className="colorChange">professionnelles</span>
               </h1>
-              <p className="text-xl mb-8">
-                Développez vos compétences dans le domaine du laser avec des formations certifiantes, accessibles en ligne à tout moment.
-              </p>
+              <div className="text-xl mb-8">
+                <TypewriterText 
+                  lines={[
+                    "Développez vos compétences dans le domaine du laser.",
+                    "Formations certifiantes disponibles 24/7.",
+                    "Accompagnement par des experts."
+                  ]}
+                  speed={80}
+                />
+              </div>
               <div className="flex flex-wrap gap-4">
                 <Link 
                   href="/register" 
-                  className="bg-white text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium text-lg transition-colors btn-pulse"
+                  className="bg-white text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium text-lg transition-colors glow-effect"
                 >
                   Commencer maintenant
                 </Link>
@@ -93,7 +105,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="flex justify-center slideInUp">
-              <div className="relative w-72 h-72 md:w-96 md:h-96">
+              <div className="relative w-72 h-72 md:w-96 md:h-96 shine-effect floating">
                 <Image
                   src="/images/courses/laser_education_icon.png"
                   alt="NWS Laser Formations"
@@ -101,7 +113,6 @@ export default async function Home() {
                   className="object-contain"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 shine"></div>
               </div>
             </div>
           </div>
@@ -119,8 +130,8 @@ export default async function Home() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow card-hover transform transition-transform">
-              <div className="bg-blue-100 p-4 rounded-full inline-block mb-6">
+            <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow shine-effect transform transition-transform">
+              <div className="bg-blue-100 p-4 rounded-full inline-block mb-6 pulse">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
@@ -131,8 +142,8 @@ export default async function Home() {
               </p>
             </div>
             
-            <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow card-hover transform transition-transform">
-              <div className="bg-blue-100 p-4 rounded-full inline-block mb-6">
+            <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow shine-effect transform transition-transform">
+              <div className="bg-blue-100 p-4 rounded-full inline-block mb-6 pulse">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -143,8 +154,8 @@ export default async function Home() {
               </p>
             </div>
             
-            <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow card-hover transform transition-transform">
-              <div className="bg-blue-100 p-4 rounded-full inline-block mb-6">
+            <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow shine-effect transform transition-transform">
+              <div className="bg-blue-100 p-4 rounded-full inline-block mb-6 pulse">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -174,13 +185,13 @@ export default async function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {topCourses.length > 0 ? (
               topCourses.map((course, index) => (
-                <div key={course._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow card-hover">
+                <div key={course._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow fade-in-section is-visible">
                   <div className="relative h-48 overflow-hidden">
                     <Image 
                       src={course.image || courseImages[index % courseImages.length]} 
                       alt={course.title} 
                       fill 
-                      className="object-cover" 
+                      className="object-cover scale-animate" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
                       <Link href={`/courses/${course._id}`} className="p-4 text-white w-full">
@@ -197,7 +208,7 @@ export default async function Home() {
                       <span className="text-blue-600 font-bold">{course.price} €</span>
                       <Link 
                         href={`/courses/${course._id}`} 
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors glow-effect"
                       >
                         En savoir plus
                       </Link>
@@ -209,13 +220,13 @@ export default async function Home() {
               // Formations de secours si aucune n'est trouvée en base de données
               <>
                 {/* Course 1 */}
-                <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow card-hover">
+                <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow fade-in-section is-visible">
                   <div className="relative h-48 overflow-hidden">
                     <Image 
                       src={courseImages[0]} 
                       alt="Traitement Laser Textile" 
                       fill 
-                      className="object-cover" 
+                      className="object-cover scale-animate" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
                       <div className="p-4 text-white">
@@ -232,7 +243,7 @@ export default async function Home() {
                       <span className="text-blue-600 font-bold">199 €</span>
                       <Link 
                         href="/courses/securite-laser-1" 
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors glow-effect"
                       >
                         En savoir plus
                       </Link>
@@ -241,13 +252,13 @@ export default async function Home() {
                 </div>
                 
                 {/* Course 2 */}
-                <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow card-hover">
+                <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow fade-in-section is-visible">
                   <div className="relative h-48 overflow-hidden">
                     <Image 
                       src={courseImages[1]} 
                       alt="Découpe Laser Métal" 
                       fill 
-                      className="object-cover" 
+                      className="object-cover scale-animate" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
                       <div className="p-4 text-white">
@@ -264,7 +275,7 @@ export default async function Home() {
                       <span className="text-blue-600 font-bold">249 €</span>
                       <Link 
                         href="/courses/technologie-laser" 
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors glow-effect"
                       >
                         En savoir plus
                       </Link>
@@ -273,13 +284,13 @@ export default async function Home() {
                 </div>
                 
                 {/* Course 3 */}
-                <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow card-hover">
+                <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow fade-in-section is-visible">
                   <div className="relative h-48 overflow-hidden">
                     <Image 
                       src={courseImages[2]} 
                       alt="Laser de découpe" 
                       fill 
-                      className="object-cover" 
+                      className="object-cover scale-animate" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end">
                       <div className="p-4 text-white">
@@ -296,7 +307,7 @@ export default async function Home() {
                       <span className="text-blue-600 font-bold">299 €</span>
                       <Link 
                         href="/courses/laser-medical" 
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors glow-effect"
                       >
                         En savoir plus
                       </Link>
@@ -345,7 +356,7 @@ export default async function Home() {
             <div className="flex flex-wrap justify-center gap-4">
               <Link 
                 href="/register" 
-                className="bg-white text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium text-lg transition-colors btn-pulse"
+                className="bg-white text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium text-lg transition-colors glow-effect"
               >
                 S'inscrire
               </Link>

@@ -9,10 +9,12 @@ import { Toaster } from 'react-hot-toast';
 export const metadata: Metadata = {
   title: "NWS Laser Formations",
   description: "Plateforme de formations laser en ligne",
-  icons: {
-    icon: '/nws_laser_logo.png',
-    apple: '/nws_laser_logo.png',
-  }
+  icons: [
+    { rel: 'icon', url: '/nws_laser_logo.png' },
+    { rel: 'icon', url: '/favicon.ico' },
+    { rel: 'apple-touch-icon', url: '/nws_laser_logo.png' },
+    { rel: 'shortcut icon', url: '/nws_laser_logo.png' }
+  ]
 };
 
 export default function RootLayout({
@@ -22,6 +24,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/nws_laser_logo.png" />
+        <link rel="shortcut icon" href="/nws_laser_logo.png" />
+        <link rel="apple-touch-icon" href="/nws_laser_logo.png" />
+      </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <Providers>
           <Navbar />
